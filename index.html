@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script>
+      const suppressWebSocketErrors = (event) => {
+        const errObj = event.error || event.reason;
+        const msg = event.message || (errObj && errObj.message) || String(errObj);
+        if (
+          typeof msg === 'string' && 
+          (msg.toLowerCase().includes('websocket') || 
+           msg.includes('[vite]') || 
+           msg.includes('WebSocket closed without opened'))
+        ) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
+      };
+      window.addEventListener('error', suppressWebSocketErrors, true);
+      window.addEventListener('unhandledrejection', suppressWebSocketErrors, true);
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chris - Offline-First AI</title>
+    <link rel="manifest" href="/manifest.json" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then(registration => {
+            console.log('SW registered: ', registration);
+          }).catch(registrationError => {
+            console.log('SW registration failed: ', registrationError);
+          });
+        });
+      }
+    </script>
+    <script type="module" src="/src/main.tsx"></script>  
+  </body>
+</html>
